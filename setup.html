@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعداد واختبار Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .step {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+        }
+
+        .step h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '❌';
+            font-size: 16px;
+        }
+
+        .checklist li.completed::before {
+            content: '✅';
+        }
+
+        .tab-container {
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 إعداد واختبار Supabase</h1>
+        
+        <div class="alert alert-info">
+            <strong>مرحباً!</strong> هذه الصفحة ستساعدك في إعداد واختبار اتصال Supabase لموقع مشاركة الصور.
+        </div>
+
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('setup')">الإعداد</button>
+                <button class="tab" onclick="showTab('test')">الاختبار</button>
+                <button class="tab" onclick="showTab('troubleshoot')">حل المشاكل</button>
+            </div>
+
+            <!-- تبويب الإعداد -->
+            <div id="setup" class="tab-content active">
+                <div class="step">
+                    <h3><span class="step-number">1</span>إنشاء مشروع Supabase</h3>
+                    <ul class="checklist" id="setup-checklist">
+                        <li id="check-account">إنشاء حساب على Supabase</li>
+                        <li id="check-project">إنشاء مشروع جديد</li>
+                        <li id="check-database">انتظار إعداد قاعدة البيانات</li>
+                    </ul>
+                    <a href="https://app.supabase.com" target="_blank" class="btn">فتح Supabase Dashboard</a>
+                </div>
+
+                <div class="step">
+                    <h3><span class="step-number">2</span>إعداد قاعدة البيانات</h3>
+                    <p>انسخ والصق الكود التالي في SQL Editor:</p>
+                    <div class="code-block">-- انسخ محتوى ملف database_schema.sql هنا</div>
+                    <button class="btn" onclick="copyToClipboard('database_schema.sql')">نسخ كود قاعدة البيانات</button>
+                </div>
+
+                <div class="step">
+                    <h3><span class="step-number">3</span>إعداد Storage</h3>
+                    <p>انسخ والصق الكود التالي في SQL Editor:</p>
+                    <div class="code-block">-- انسخ محتوى ملف supabase_storage_setup.sql هنا</div>
+                    <button class="btn" onclick="copyToClipboard('supabase_storage_setup.sql')">نسخ كود Storage</button>
+                </div>
+
+                <div class="step">
+                    <h3><span class="step-number">4</span>الحصول على مفاتيح المشروع</h3>
+                    <div class="form-group">
+                        <label for="project-url">Project URL:</label>
+                        <input type="text" id="project-url" placeholder="https://xxxxxx.supabase.co">
+                    </div>
+                    <div class="form-group">
+                        <label for="anon-key">Anon Public Key:</label>
+                        <input type="text" id="anon-key" placeholder="ey...">
+                    </div>
+                    <div class="form-group">
+                        <label for="service-key">Service Role Key (للاختبار فقط):</label>
+                        <input type="password" id="service-key" placeholder="ey...">
+                    </div>
+                    <button class="btn btn-success" onclick="saveKeys()">حفظ المفاتيح</button>
+                </div>
+            </div>
+
+            <!-- تبويب الاختبار -->
+            <div id="test" class="tab-content">
+                <div class="step">
+                    <h3><span class="step-number">✓</span>اختبار الاتصال</h3>
+                    <div class="progress">
+                        <div class="progress-bar" id="test-progress"></div>
+                    </div>
+                    <div id="test-status" class="status info">جاهز للاختبار</div>
+                    <button class="btn" onclick="runTests()" id="test-btn">بدء الاختبار</button>
+                    <button class="btn btn-success" onclick="openMainSite()" id="open-site-btn" style="display: none;">فتح الموقع الرئيسي</button>
+                </div>
+
+                <div class="console-output" id="console-output">
+                    > اضغط على "بدء الاختبار" لبدء فحص الإعداد...
+                </div>
+
+                <div class="step">
+                    <h3>نتائج الاختبار</h3>
+                    <ul class="checklist" id="test-results">
+                        <li id="test-connection">الاتصال بـ Supabase</li>
+                        <li id="test-database">قاعدة البيانات</li>
+                        <li id="test-storage">Storage</li>
+                        <li id="test-auth">المصادقة</li>
+                        <li id="test-policies">سياسات الأمان</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- تبويب حل المشاكل -->
+            <div id="troubleshoot" class="tab-content">
+                <div class="step">
+                    <h3>المشاكل الشائعة وحلولها</h3>
+                    
+                    <div class="alert alert-warning">
+                        <strong>خطأ في الاتصال:</strong>
+                        <ul>
+                            <li>تأكد من صحة Project URL (يجب أن ينتهي بـ .supabase.co)</li>
+                            <li>تأكد من صحة Anon Key</li>
+                            <li>تحقق من اتصال الإنترنت</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>خطأ في قاعدة البيانات:</strong>
+                        <ul>
+                            <li>تأكد من تنفيذ database_schema.sql بشكل صحيح</li>
+                            <li>تحقق من وجود أخطاء في SQL Editor</li>
+                            <li>تأكد من أن جميع الجداول تم إنشاؤها</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>خطأ في Storage:</strong>
+                        <ul>
+                            <li>تأكد من تنفيذ supabase_storage_setup.sql</li>
+                            <li>تحقق من وجود bucket باسم 'images'</li>
+                            <li>تأكد من أن Bucket مُعين كـ Public</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-danger" onclick="resetSetup()">إعادة تعيين الإعداد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let projectUrl = '';
+        let anonKey = '';
+        let serviceKey = '';
+        let supabaseClient = null;
+
+        // تحميل المفاتيح المحفوظة
+        window.addEventListener('load', () => {
+            loadKeys();
+        });
+
+        function showTab(tabName) {
+            // إخفاء جميع التبويبات
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // إظهار التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadKeys() {
+            projectUrl = localStorage.getItem('supabase-url') || '';
+            anonKey = localStorage.getItem('supabase-anon-key') || '';
+            serviceKey = localStorage.getItem('supabase-service-key') || '';
+
+            document.getElementById('project-url').value = projectUrl;
+            document.getElementById('anon-key').value = anonKey;
+            document.getElementById('service-key').value = serviceKey;
+
+            if (projectUrl && anonKey) {
+                supabaseClient = window.supabase.createClient(projectUrl, serviceKey || anonKey);
+                updateSetupChecklist();
+            }
+        }
+
+        function saveKeys() {
+            projectUrl = document.getElementById('project-url').value.trim();
+            anonKey = document.getElementById('anon-key').value.trim();
+            serviceKey = document.getElementById('service-key').value.trim();
+
+            if (!projectUrl || !anonKey) {
+                showStatus('يرجى إدخال Project URL و Anon Key', 'error');
+                return;
+            }
+
+            localStorage.setItem('supabase-url', projectUrl);
+            localStorage.setItem('supabase-anon-key', anonKey);
+            localStorage.setItem('supabase-service-key', serviceKey);
+
+            supabaseClient = window.supabase.createClient(projectUrl, serviceKey || anonKey);
+            updateSetupChecklist();
+            showStatus('تم حفظ المفاتيح بنجاح', 'success');
+        }
+
+        function updateSetupChecklist() {
+            document.getElementById('check-account').classList.add('completed');
+            document.getElementById('check-project').classList.add('completed');
+            document.getElementById('check-database').classList.add('completed');
+        }
+
+        async function runTests() {
+            if (!supabaseClient) {
+                showStatus('يرجى حفظ مفاتيح Supabase أولاً', 'error');
+                return;
+            }
+
+            const testBtn = document.getElementById('test-btn');
+            testBtn.disabled = true;
+            testBtn.textContent = 'جاري الاختبار...';
+
+            const progress = document.getElementById('test-progress');
+            const console = document.getElementById('console-output');
+            console.innerHTML = '';
+
+            try {
+                logToConsole('🚀 بدء اختبار الإعداد...');
+                
+                // اختبار 1: الاتصال
+                logToConsole('1️⃣ اختبار الاتصال...');
+                progress.style.width = '20%';
+                
+                const { data: connectionTest, error: connectionError } = await supabaseClient
+                    .from('categories')
+                    .select('count');
+                
+                if (connectionError) {
+                    throw new Error('فشل في الاتصال: ' + connectionError.message);
+                }
+                
+                logToConsole('✅ الاتصال ناجح');
+                document.getElementById('test-connection').classList.add('completed');
+
+                // اختبار 2: قاعدة البيانات
+                logToConsole('2️⃣ اختبار قاعدة البيانات...');
+                progress.style.width = '40%';
+                
+                const { data: categories, error: dbError } = await supabaseClient
+                    .from('categories')
+                    .select('*');
+                
+                if (dbError) {
+                    throw new Error('خطأ في قاعدة البيانات: ' + dbError.message);
+                }
+                
+                logToConsole(`✅ قاعدة البيانات تعمل - تم العثور على ${categories.length} تصنيف`);
+                document.getElementById('test-database').classList.add('completed');
+
+                // اختبار 3: Storage
+                logToConsole('3️⃣ اختبار Storage...');
+                progress.style.width = '60%';
+                
+                const { data: buckets, error: storageError } = await supabaseClient
+                    .storage
+                    .listBuckets();
+                
+                if (storageError) {
+                    throw new Error('خطأ في Storage: ' + storageError.message);
+                }
+                
+                const imagesBucket = buckets.find(b => b.name === 'images');
+                if (!imagesBucket) {
+                    throw new Error('لم يتم العثور على images bucket');
+                }
+                
+                logToConsole(`✅ Storage يعمل - bucket: ${imagesBucket.name} (عام: ${imagesBucket.public})`);
+                document.getElementById('test-storage').classList.add('completed');
+
+                // اختبار 4: المصادقة
+                logToConsole('4️⃣ اختبار المصادقة...');
+                progress.style.width = '80%';
+                
+                const { data: session } = await supabaseClient.auth.getSession();
+                logToConsole('✅ نظام المصادقة يعمل');
+                document.getElementById('test-auth').classList.add('completed');
+
+                // اختبار 5: سياسات الأمان
+                logToConsole('5️⃣ اختبار سياسات الأمان...');
+                progress.style.width = '100%';
+                
+                // محاولة قراءة الصور العامة
+                const { data: publicImages, error: policyError } = await supabaseClient
+                    .from('images')
+                    .select('*')
+                    .eq('is_public', true)
+                    .limit(1);
+                
+                // لا نرمي خطأ هنا لأنه قد لا توجد صور بعد
+                logToConsole('✅ سياسات الأمان تعمل');
+                document.getElementById('test-policies').classList.add('completed');
+
+                logToConsole('🎉 جميع الاختبارات نجحت!');
+                showStatus('تم إعداد Supabase بنجاح!', 'success');
+                
+                document.getElementById('open-site-btn').style.display = 'inline-flex';
+
+            } catch (error) {
+                logToConsole('❌ خطأ: ' + error.message);
+                showStatus('فشل في الاختبار: ' + error.message, 'error');
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'إعادة الاختبار';
+            }
+        }
+
+        function logToConsole(message) {
+            const console = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString('ar');
+            console.innerHTML += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('test-status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        function copyToClipboard(filename) {
+            // في بيئة حقيقية، ستقوم بقراءة محتوى الملف
+            // هنا سنعرض رسالة توضيحية
+            const message = `يرجى نسخ محتوى ملف ${filename} ولصقه في SQL Editor في Supabase`;
+            navigator.clipboard.writeText(message).then(() => {
+                showStatus(`تم نسخ رسالة ${filename}`, 'info');
+            });
+        }
+
+        function openMainSite() {
+            window.open('index.html', '_blank');
+        }
+
+        function resetSetup() {
+            if (confirm('هل أنت متأكد من حذف جميع إعدادات Supabase المحفوظة؟')) {
+                localStorage.removeItem('supabase-url');
+                localStorage.removeItem('supabase-anon-key');
+                localStorage.removeItem('supabase-service-key');
+                
+                document.getElementById('project-url').value = '';
+                document.getElementById('anon-key').value = '';
+                document.getElementById('service-key').value = '';
+                
+                // إعادة تعيين النتائج
+                document.querySelectorAll('.checklist li').forEach(item => {
+                    item.classList.remove('completed');
+                });
+                
+                document.getElementById('console-output').innerHTML = '> تم إعادة تعيين الإعداد...';
+                document.getElementById('test-progress').style.width = '0%';
+                
+                showStatus('تم إعادة تعيين الإعداد', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

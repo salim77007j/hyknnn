@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع مشاركة الصور</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-images"></i>
+                <span>مشاركة الصور</span>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="#home" class="nav-link active" data-section="home">
+                    <i class="fas fa-home"></i> الرئيسية
+                </a>
+                <a href="#upload" class="nav-link" data-section="upload">
+                    <i class="fas fa-cloud-upload-alt"></i> رفع صورة
+                </a>
+                <a href="#categories" class="nav-link" data-section="categories">
+                    <i class="fas fa-tags"></i> التصنيفات
+                </a>
+                <a href="#my-images" class="nav-link" data-section="my-images" style="display: none;">
+                    <i class="fas fa-user-images"></i> صوري
+                </a>
+            </div>
+
+            <div class="nav-auth">
+                <div id="auth-buttons">
+                    <button id="login-btn" class="btn btn-outline">تسجيل الدخول</button>
+                    <button id="register-btn" class="btn btn-primary">إنشاء حساب</button>
+                </div>
+                <div id="user-menu" style="display: none;">
+                    <span id="user-email"></span>
+                    <button id="logout-btn" class="btn btn-outline">تسجيل الخروج</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- الصفحة الرئيسية -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>مرحباً بك في موقع مشاركة الصور</h1>
+                <p>شارك صورك مع العالم واستكشف إبداعات الآخرين</p>
+                <button class="btn btn-primary btn-large" onclick="showSection('upload')">
+                    <i class="fas fa-cloud-upload-alt"></i> ابدأ برفع صورة
+                </button>
+            </div>
+
+            <!-- فلتر البحث والتصنيفات -->
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="ابحث عن الصور...">
+                </div>
+                <select id="category-filter">
+                    <option value="">جميع التصنيفات</option>
+                </select>
+                <select id="sort-filter">
+                    <option value="created_at">الأحدث</option>
+                    <option value="view_count">الأكثر مشاهدة</option>
+                    <option value="download_count">الأكثر تحميلاً</option>
+                </select>
+            </div>
+
+            <!-- عرض الصور -->
+            <div class="images-grid" id="images-grid">
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                </div>
+            </div>
+
+            <!-- زر تحميل المزيد -->
+            <div class="load-more-container">
+                <button id="load-more-btn" class="btn btn-outline" style="display: none;">
+                    تحميل المزيد
+                </button>
+            </div>
+        </section>
+
+        <!-- صفحة رفع الصور -->
+        <section id="upload" class="section">
+            <div class="upload-container">
+                <h2>رفع صورة جديدة</h2>
+                
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>اسحب وأفلت الصور هنا</h3>
+                        <p>أو اضغط لاختيار الملفات</p>
+                        <p class="upload-note">الحد الأقصى: 5 ميجابايت | JPG, PNG, GIF</p>
+                    </div>
+                    <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+                </div>
+
+                <div id="upload-form" class="upload-form" style="display: none;">
+                    <div class="preview-container" id="preview-container"></div>
+                    
+                    <form id="image-form">
+                        <div class="form-group">
+                            <label for="image-title">عنوان الصورة *</label>
+                            <input type="text" id="image-title" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image-description">وصف الصورة</label>
+                            <textarea id="image-description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image-category">التصنيف</label>
+                            <select id="image-category">
+                                <option value="">اختر تصنيف</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image-tags">العلامات (مفصولة بفاصلة)</label>
+                            <input type="text" id="image-tags" placeholder="مثال: طبيعة, جميل, منظر">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="is-public" checked>
+                                <span class="checkmark"></span>
+                                جعل الصورة عامة (مرئية للجميع)
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancel-upload" class="btn btn-outline">إلغاء</button>
+                            <button type="submit" id="submit-upload" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> رفع الصورة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- صفحة التصنيفات -->
+        <section id="categories" class="section">
+            <div class="categories-container">
+                <h2>تصفح حسب التصنيف</h2>
+                <div class="categories-grid" id="categories-grid">
+                    <!-- سيتم ملؤها تلقائياً -->
+                </div>
+            </div>
+        </section>
+
+        <!-- صفحة صور المستخدم -->
+        <section id="my-images" class="section">
+            <div class="my-images-container">
+                <h2>صوري</h2>
+                <div class="my-images-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="my-images-count">0</span>
+                        <span class="stat-label">صورة</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="my-views-count">0</span>
+                        <span class="stat-label">مشاهدة</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="my-downloads-count">0</span>
+                        <span class="stat-label">تحميل</span>
+                    </div>
+                </div>
+                <div class="images-grid" id="my-images-grid">
+                    <!-- صور المستخدم -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- مودال عرض الصورة -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <div class="modal-body">
+                <div class="image-container">
+                    <img id="modal-image" src="" alt="">
+                </div>
+                <div class="image-details">
+                    <h3 id="modal-title"></h3>
+                    <p id="modal-description"></p>
+                    <div class="image-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-eye"></i>
+                            <span id="modal-views">0</span> مشاهدة
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-download"></i>
+                            <span id="modal-downloads">0</span> تحميل
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span id="modal-date"></span>
+                        </span>
+                    </div>
+                    <div class="image-tags" id="modal-tags"></div>
+                    <div class="image-actions">
+                        <button class="btn btn-primary" id="download-btn">
+                            <i class="fas fa-download"></i> تحميل
+                        </button>
+                        <button class="btn btn-outline" id="share-btn">
+                            <i class="fas fa-share"></i> مشاركة
+                        </button>
+                        <button class="btn btn-outline" id="favorite-btn">
+                            <i class="far fa-heart"></i> إعجاب
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- التعليقات -->
+            <div class="comments-section">
+                <h4>التعليقات</h4>
+                <div id="comments-list"></div>
+                <div id="comment-form" style="display: none;">
+                    <textarea id="comment-text" placeholder="اكتب تعليقك..."></textarea>
+                    <button class="btn btn-primary" id="submit-comment">
+                        <i class="fas fa-paper-plane"></i> إرسال
+                    </button>
+                </div>
+                <div id="login-prompt" class="login-prompt">
+                    <p>يجب تسجيل الدخول لإضافة تعليق</p>
+                    <button class="btn btn-primary" onclick="showLoginModal()">تسجيل الدخول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تسجيل الدخول -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-modal">
+            <span class="close" id="close-auth-modal">&times;</span>
+            
+            <!-- تسجيل الدخول -->
+            <div id="login-form" class="auth-form">
+                <h3>تسجيل الدخول</h3>
+                <form id="signin-form">
+                    <div class="form-group">
+                        <label for="signin-email">البريد الإلكتروني</label>
+                        <input type="email" id="signin-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signin-password">كلمة المرور</label>
+                        <input type="password" id="signin-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">تسجيل الدخول</button>
+                </form>
+                <p class="switch-form">
+                    ليس لديك حساب؟ 
+                    <a href="#" onclick="switchAuthForm('register')">إنشاء حساب جديد</a>
+                </p>
+            </div>
+
+            <!-- إنشاء حساب -->
+            <div id="register-form" class="auth-form" style="display: none;">
+                <h3>إنشاء حساب جديد</h3>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-email">البريد الإلكتروني</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">كلمة المرور</label>
+                        <input type="password" id="signup-password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm">تأكيد كلمة المرور</label>
+                        <input type="password" id="signup-confirm" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">إنشاء حساب</button>
+                </form>
+                <p class="switch-form">
+                    لديك حساب بالفعل؟ 
+                    <a href="#" onclick="switchAuthForm('login')">تسجيل الدخول</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- التنبيهات -->
+    <div id="notifications"></div>
+
+    <!-- تحميل مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- تحميل ملف الإعدادات أولاً -->
+    <script src="config.js"></script>
+    <!-- ثم تحميل التطبيق الرئيسي -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشخيص المشاكل - موقع مشاركة الصور</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success { border-color: #4caf50; background: #f8f9fa; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .warning { border-color: #ff9800; background: #fff3e0; }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .test-result {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .success-msg { color: #4caf50; }
+        .error-msg { color: #f44336; }
+        .warning-msg { color: #ff9800; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        #console-output {
+            height: 300px;
+            overflow-y: auto;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 أداة تشخيص مشاكل موقع مشاركة الصور</h1>
+        
+        <div id="config-test" class="test-section">
+            <div class="test-title">1️⃣ اختبار ملف الإعدادات (config.js)</div>
+            <div id="config-result"></div>
+        </div>
+        
+        <div id="supabase-test" class="test-section">
+            <div class="test-title">2️⃣ اختبار الاتصال بـ Supabase</div>
+            <div id="supabase-result"></div>
+        </div>
+        
+        <div id="auth-test" class="test-section">
+            <div class="test-title">3️⃣ اختبار المصادقة</div>
+            <div id="auth-result"></div>
+        </div>
+        
+        <div id="storage-test" class="test-section">
+            <div class="test-title">4️⃣ اختبار Storage</div>
+            <div id="storage-result"></div>
+        </div>
+        
+        <div id="database-test" class="test-section">
+            <div class="test-title">5️⃣ اختبار قاعدة البيانات</div>
+            <div id="database-result"></div>
+            <button onclick="testDatabase()">اختبار قراءة البيانات</button>
+        </div>
+        
+        <div id="functions-test" class="test-section">
+            <div class="test-title">6️⃣ اختبار الدوال</div>
+            <div id="functions-result"></div>
+            <button onclick="testFunctions()">اختبار الدوال</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📋 سجل وحدة التحكم</div>
+            <button onclick="clearConsole()">مسح السجل</button>
+            <div id="console-output"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        let supabase = null;
+        let consoleOutput = [];
+
+        // تسجيل جميع رسائل وحدة التحكم
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('LOG', args.join(' '));
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('ERROR', args.join(' '));
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('WARN', args.join(' '));
+        };
+
+        function addToConsole(type, message) {
+            const timestamp = new Date().toLocaleTimeString('ar');
+            consoleOutput.push({type, message, timestamp});
+            updateConsoleDisplay();
+        }
+
+        function updateConsoleDisplay() {
+            const output = document.getElementById('console-output');
+            output.innerHTML = consoleOutput.map(entry => {
+                const color = entry.type === 'ERROR' ? '#f56565' : 
+                             entry.type === 'WARN' ? '#ed8936' : '#68d391';
+                return `<div style="color: ${color};">[${entry.timestamp}] ${entry.type}: ${entry.message}</div>`;
+            }).join('');
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearConsole() {
+            consoleOutput = [];
+            updateConsoleDisplay();
+        }
+
+        function showResult(elementId, isSuccess, message, details = '') {
+            const element = document.getElementById(elementId);
+            const parent = element.parentElement;
+            
+            parent.className = `test-section ${isSuccess ? 'success' : 'error'}`;
+            
+            element.innerHTML = `
+                <div class="test-result ${isSuccess ? 'success-msg' : 'error-msg'}">
+                    ${isSuccess ? '✅' : '❌'} ${message}
+                </div>
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+        }
+
+        // 1. اختبار ملف الإعدادات
+        function testConfig() {
+            try {
+                if (typeof CONFIG === 'undefined') {
+                    showResult('config-result', false, 'ملف config.js غير محمل');
+                    return false;
+                }
+
+                let issues = [];
+                if (!CONFIG.SUPABASE.URL || CONFIG.SUPABASE.URL === 'YOUR_SUPABASE_URL') {
+                    issues.push('- SUPABASE_URL غير محدد');
+                }
+                if (!CONFIG.SUPABASE.ANON_KEY || CONFIG.SUPABASE.ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                    issues.push('- SUPABASE_ANON_KEY غير محدد');
+                }
+
+                if (issues.length > 0) {
+                    showResult('config-result', false, 'مشاكل في ملف الإعدادات:', issues.join('\n'));
+                    return false;
+                }
+
+                showResult('config-result', true, 'ملف الإعدادات صحيح', 
+                    `URL: ${CONFIG.SUPABASE.URL}\nKey: ${CONFIG.SUPABASE.ANON_KEY.substring(0, 20)}...`);
+                return true;
+            } catch (error) {
+                showResult('config-result', false, 'خطأ في قراءة ملف الإعدادات', error.message);
+                return false;
+            }
+        }
+
+        // 2. اختبار الاتصال بـ Supabase
+        async function testSupabase() {
+            try {
+                if (!testConfig()) return false;
+
+                supabase = window.supabase.createClient(CONFIG.SUPABASE.URL, CONFIG.SUPABASE.ANON_KEY);
+                
+                // اختبار بسيط للاتصال
+                const { data, error } = await supabase.from('categories').select('count', { count: 'exact', head: true });
+                
+                if (error) throw error;
+
+                showResult('supabase-result', true, 'الاتصال بـ Supabase ناجح');
+                return true;
+            } catch (error) {
+                showResult('supabase-result', false, 'فشل الاتصال بـ Supabase', error.message);
+                return false;
+            }
+        }
+
+        // 3. اختبار المصادقة
+        async function testAuth() {
+            try {
+                if (!supabase) {
+                    showResult('auth-result', false, 'يجب اختبار Supabase أولاً');
+                    return false;
+                }
+
+                const { data: { session } } = await supabase.auth.getSession();
+                const isLoggedIn = !!session;
+
+                if (isLoggedIn) {
+                    showResult('auth-result', true, 'مسجل الدخول', 
+                        `المستخدم: ${session.user.email}`);
+                } else {
+                    showResult('auth-result', true, 'غير مسجل الدخول (هذا طبيعي في صفحة التشخيص)');
+                }
+                
+                return true;
+            } catch (error) {
+                showResult('auth-result', false, 'خطأ في المصادقة', error.message);
+                return false;
+            }
+        }
+
+        // 4. اختبار Storage
+        async function testStorage() {
+            try {
+                if (!supabase) {
+                    showResult('storage-result', false, 'يجب اختبار Supabase أولاً');
+                    return false;
+                }
+
+                // اختبار الحصول على قائمة الـ buckets
+                const { data: buckets, error } = await supabase.storage.listBuckets();
+                
+                if (error) throw error;
+
+                const imagesBucket = buckets.find(bucket => bucket.name === 'images');
+                
+                if (!imagesBucket) {
+                    showResult('storage-result', false, 'Bucket "images" غير موجود', 
+                        'يجب إنشاء bucket اسمه "images" من لوحة تحكم Supabase');
+                    return false;
+                }
+
+                showResult('storage-result', true, 'Storage متوفر', 
+                    `Bucket "images" موجود\nPublic: ${imagesBucket.public ? 'نعم' : 'لا'}`);
+                return true;
+            } catch (error) {
+                showResult('storage-result', false, 'خطأ في Storage', error.message);
+                return false;
+            }
+        }
+
+        // 5. اختبار قاعدة البيانات
+        async function testDatabase() {
+            try {
+                if (!supabase) {
+                    showResult('database-result', false, 'يجب اختبار Supabase أولاً');
+                    return false;
+                }
+
+                let results = [];
+
+                // اختبار جدول categories
+                const { data: categories, error: catError } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .limit(5);
+                    
+                if (catError) throw new Error(`خطأ في جدول categories: ${catError.message}`);
+                results.push(`✅ جدول categories: ${categories.length} تصنيف`);
+
+                // اختبار جدول images
+                const { data: images, error: imgError } = await supabase
+                    .from('images')
+                    .select('*')
+                    .limit(5);
+                    
+                if (imgError) throw new Error(`خطأ في جدول images: ${imgError.message}`);
+                results.push(`✅ جدول images: ${images.length} صورة`);
+
+                // اختبار جدول profiles
+                const { data: profiles, error: profError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .limit(5);
+                    
+                if (profError) throw new Error(`خطأ في جدول profiles: ${profError.message}`);
+                results.push(`✅ جدول profiles: ${profiles.length} مستخدم`);
+
+                showResult('database-result', true, 'جميع الجداول متاحة', results.join('\n'));
+                return true;
+            } catch (error) {
+                showResult('database-result', false, 'خطأ في قاعدة البيانات', error.message);
+                return false;
+            }
+        }
+
+        // 6. اختبار الدوال
+        async function testFunctions() {
+            try {
+                if (!supabase) {
+                    showResult('functions-result', false, 'يجب اختبار Supabase أولاً');
+                    return false;
+                }
+
+                // اختبار دالة increment_view_count
+                const testImageId = 'test-id-that-does-not-exist';
+                const { data, error } = await supabase.rpc('increment_view_count', { 
+                    image_uuid: testImageId 
+                });
+
+                // هذا سيفشل لأن الصورة غير موجودة، لكن هذا يعني أن الدالة موجودة
+                if (error && error.message.includes('increment_view_count')) {
+                    showResult('functions-result', false, 'دالة increment_view_count غير موجودة', 
+                        'يجب تشغيل database_schema.sql كاملاً');
+                    return false;
+                }
+
+                showResult('functions-result', true, 'الدوال متاحة', 
+                    'دالة increment_view_count موجودة');
+                return true;
+            } catch (error) {
+                showResult('functions-result', false, 'خطأ في اختبار الدوال', error.message);
+                return false;
+            }
+        }
+
+        // تشغيل جميع الاختبارات عند تحميل الصفحة
+        window.addEventListener('load', async function() {
+            console.log('🔍 بدء تشخيص المشاكل...');
+            
+            await testSupabase();
+            await testAuth();
+            await testStorage();
+            await testDatabase();
+            await testFunctions();
+            
+            console.log('✅ انتهاء التشخيص');
+        });
+    </script>
+</body>
+</html>

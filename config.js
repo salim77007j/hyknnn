@@ -4,8 +4,8 @@
 const CONFIG = {
     // إعدادات Supabase - يجب تحديثها
     SUPABASE: {
-        URL: 'YOUR_SUPABASE_URL',
-        ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+        URL: 'https://yjogtukcyeoisvzpjnsi.supabase.co',
+        ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlqb2d0dWtjeWVvaXN2enBqbnNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2ODkwOTksImV4cCI6MjA3NTI2NTA5OX0.15v0tL1vCdj-spxbyA9Eq4WT60ZR0ILUxWaXYeSf83s',
         // إعدادات إضافية
         STORAGE_BUCKET: 'images',
         MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB بالبايت
